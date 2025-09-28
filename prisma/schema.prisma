@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+enum NotificationType {
+  PRE
+  POST
+  REMINDER
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Patient {
+  id         String   @id @default(cuid())
+  fullName   String
+  dateOfBirth DateTime?
+  gender     Gender?
+  phone      String?
+  email      String?  @unique
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  sessions       Session[]
+  notifications  Notification[]
+  feedbacks      Feedback[]
+}
+
+model Practitioner {
+  id        String   @id @default(cuid())
+  fullName  String
+  specialty String?
+  phone     String?
+  email     String?  @unique
+  createdAt DateTime @default(now())
+
+  sessions  Session[]
+}
+
+model Therapy {
+  id               String   @id @default(cuid())
+  name             String
+  description      String?
+  durationMinutes  Int
+  precautionsPre   String?
+  precautionsPost  String?
+  createdAt        DateTime @default(now())
+
+  sessions         Session[]
+}
+
+model Session {
+  id              String         @id @default(cuid())
+  patientId       String
+  practitionerId  String
+  therapyId       String
+  startTime       DateTime
+  endTime         DateTime
+  status          SessionStatus  @default(SCHEDULED)
+  notes           String?
+  createdAt       DateTime       @default(now())
+
+  patient       Patient      @relation(fields: [patientId], references: [id])
+  practitioner  Practitioner @relation(fields: [practitionerId], references: [id])
+  therapy       Therapy      @relation(fields: [therapyId], references: [id])
+  notifications Notification[]
+  feedbacks     Feedback[]
+
+  @@index([patientId, startTime])
+  @@index([practitionerId, startTime])
+}
+
+model Notification {
+  id          String              @id @default(cuid())
+  patientId   String
+  sessionId   String?
+  channel     NotificationChannel
+  type        NotificationType
+  content     String
+  status      NotificationStatus  @default(PENDING)
+  sentAt      DateTime?
+  createdAt   DateTime            @default(now())
+
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  session   Session? @relation(fields: [sessionId], references: [id])
+
+  @@index([patientId])
+  @@index([sessionId])
+}
+
+model Feedback {
+  id          String    @id @default(cuid())
+  patientId   String
+  sessionId   String
+  rating      Int?
+  symptoms    String?
+  sideEffects String?
+  improvements String?
+  createdAt   DateTime  @default(now())
+
+  patient   Patient @relation(fields: [patientId], references: [id])
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  @@index([patientId])
+  @@index([sessionId])
+}
