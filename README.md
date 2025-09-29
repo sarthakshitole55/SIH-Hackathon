@@ -1,28 +1,5 @@
 # SIH Hackathon – Panchakarma Management Software (AyurSutra)
 
-## 📂 Project Structure
-SIH-Hackathon/
-
-│── client/ # Frontend (React + Vite + MUI + Emotion)
-
-│── prisma/ # Prisma ORM config and schema
-
-│ └── schema.prisma # Database models
-
-│── server/ # Backend (Express.js, Prisma, routes, middleware)
-
-│── src/ # Shared utilities, types, or services
-
-│── .gitignore
-
-│── README.md
-
-│── package.json
-
-│── package-lock.json
-
-│── tsconfig.json
-
 ---
 
 ## ⚙️ Tech Stack
